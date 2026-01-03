@@ -1,0 +1,41 @@
+{
+  "hooks": [
+    {
+      "event": "PostToolUse",
+      "matcher": {
+        "tool_name": ["Edit", "Write", "MultiEdit"]
+      },
+      "commands": [
+        {
+          "command": "npx prettier --write $FILEPATH 2>/dev/null || true"
+        }
+      ]
+    },
+    {
+      "event": "PreToolUse",
+      "matcher": {
+        "tool_name": "Bash",
+        "command_pattern": "(git push|gh pr create)"
+      },
+      "commands": [
+        {
+          "command": "npm test",
+          "fail_on_error": true
+        },
+        {
+          "command": "npm run lint",
+          "fail_on_error": true
+        }
+      ]
+    },
+    {
+      "event": "Stop",
+      "commands": [
+        {
+          "command": "./hooks/verify-before-stop.sh",
+          "fail_on_error": true
+        }
+      ]
+    }
+  ]
+}

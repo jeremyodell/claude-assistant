@@ -1,0 +1,76 @@
+# Claude Security Review Action
+# Automatically scans PRs for security vulnerabilities
+# Copy this file to your repo's .github/workflows/ directory
+
+name: Claude Security Review
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened]
+
+permissions:
+  contents: read
+  pull-requests: write
+  security-events: write
+
+jobs:
+  security-review:
+    runs-on: ubuntu-latest
+    name: Claude Security Review
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          
+      - name: Run Claude Security Review
+        uses: anthropics/claude-code-security-review@main
+        with:
+          anthropic_api_key: ${{ secrets.ANTHROPIC_API_KEY }}
+          
+          # Scan configuration
+          scan_mode: "comprehensive"
+          
+          # Security focus areas
+          security_checks: |
+            - SQL injection
+            - XSS vulnerabilities
+            - CSRF protection
+            - Authentication flaws
+            - Authorization issues
+            - Sensitive data exposure
+            - Security misconfigurations
+            - Insecure dependencies
+            - Injection attacks
+            - Cryptographic failures
+            
+          # Severity settings
+          fail_on_severity: "high"  # Fail the check on high severity issues
+          
+          # SARIF output for GitHub Security tab
+          sarif_output: true
+          sarif_file: "claude-security-results.sarif"
+          
+          # Custom security rules
+          custom_rules: |
+            - Ensure API keys are not hardcoded
+            - Check for proper input validation
+            - Verify secure communication (HTTPS)
+            - Check for proper session management
+            - Ensure secure cookie settings
+            
+      - name: Upload SARIF results
+        if: always()
+        uses: github/codeql-action/upload-sarif@v3
+        with:
+          sarif_file: claude-security-results.sarif
+          
+      - name: Post Security Summary
+        if: always()
+        run: |
+          echo "## Claude Security Review Complete" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "Security findings have been:" >> $GITHUB_STEP_SUMMARY
+          echo "- Posted as PR comments" >> $GITHUB_STEP_SUMMARY
+          echo "- Uploaded to GitHub Security tab" >> $GITHUB_STEP_SUMMARY

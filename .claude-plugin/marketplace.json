@@ -1,0 +1,19 @@
+{
+  "name": "claude-assistant-marketplace",
+  "version": "1.0.0",
+  "description": "Collection of Claude Code plugins, skills, and tools by Jeremy Odell",
+  "plugins": [
+    {
+      "name": "team-workflow",
+      "version": "1.0.0",
+      "description": "Deterministic team development workflow with Linear integration, enforced TDD, and quality gates",
+      "path": "./plugins/team-workflow",
+      "keywords": ["workflow", "linear", "tdd", "quality-gates", "team", "code-review"]
+    }
+  ],
+  "author": {
+    "name": "Jeremy Odell",
+    "github": "jeremyodell"
+  },
+  "repository": "https://github.com/jeremyodell/claude-assistant"
+}
