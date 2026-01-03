@@ -1,6 +1,9 @@
 {
   "name": "claude-assistant-marketplace",
-  "owner": "jeremyodell",
+  "owner": {
+    "name": "Jeremy Odell",
+    "github": "jeremyodell"
+  },
   "version": "1.0.0",
   "description": "Collection of Claude Code plugins, skills, and tools by Jeremy Odell",
   "plugins": [
