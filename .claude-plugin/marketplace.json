@@ -12,6 +12,12 @@
       "version": "1.0.0",
       "description": "Deterministic team development workflow with Linear integration, enforced TDD, and quality gates",
       "source": "./plugins/team-workflow"
+    },
+    {
+      "name": "ideate",
+      "version": "1.0.0",
+      "description": "Guided ideation workflow for exploring ideas through structured conversation before implementation",
+      "source": "./plugins/ideate"
     }
   ],
   "repository": "https://github.com/jeremyodell/claude-assistant"
