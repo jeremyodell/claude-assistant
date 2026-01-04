@@ -103,6 +103,56 @@ export const COMPONENT_COLORS: Record<ComponentType, ColorScheme> = {
     primary: '#64748B',
     light: '#F1F5F9',
     dark: '#334155'
+  },
+
+  // Plugin structure components
+  // Marketplace - Purple (container, orchestration)
+  marketplace: {
+    primary: '#8B5CF6',
+    light: '#F5F3FF',
+    dark: '#6D28D9'
+  },
+
+  // Plugin - Blue (package, container)
+  plugin: {
+    primary: '#3B82F6',
+    light: '#EFF6FF',
+    dark: '#1D4ED8'
+  },
+
+  // Command - Green (action, execution)
+  command: {
+    primary: '#22C55E',
+    light: '#F0FDF4',
+    dark: '#15803D'
+  },
+
+  // Skill - Teal (knowledge, guidance)
+  skill: {
+    primary: '#14B8A6',
+    light: '#F0FDFA',
+    dark: '#0F766E'
+  },
+
+  // Hook - Orange (event, trigger)
+  hook: {
+    primary: '#F97316',
+    light: '#FFF7ED',
+    dark: '#C2410C'
+  },
+
+  // MCP - Gold (integration, external)
+  mcp: {
+    primary: '#EAB308',
+    light: '#FEFCE8',
+    dark: '#A16207'
+  },
+
+  // Module - Gray (code, internal)
+  module: {
+    primary: '#71717A',
+    light: '#FAFAFA',
+    dark: '#3F3F46'
   }
 };
 

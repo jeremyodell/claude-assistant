@@ -1,6 +1,7 @@
 export type Provider = 'aws' | 'gcp' | 'azure' | 'generic';
 
 export type ComponentType =
+  // Infrastructure components
   | 'frontend'      // React, Vue, mobile apps
   | 'api'           // API Gateway, Load Balancer
   | 'compute'       // Lambda, ECS, EC2
@@ -13,9 +14,18 @@ export type ComponentType =
   | 'auth'          // Cognito, Auth0
   | 'monitoring'    // CloudWatch, Datadog
   | 'external'      // Third-party APIs
-  | 'user';         // End users
+  | 'user'          // End users
+  // Plugin structure components
+  | 'marketplace'   // Plugin marketplace
+  | 'plugin'        // Claude Code plugin
+  | 'command'       // Slash command
+  | 'skill'         // Plugin skill
+  | 'hook'          // Plugin hook
+  | 'mcp'           // MCP server
+  | 'module';       // Source code module
 
 export type ConnectionType =
+  // Infrastructure connections
   | 'http'          // REST API calls
   | 'grpc'          // gRPC calls
   | 'graphql'       // GraphQL queries
@@ -26,9 +36,16 @@ export type ConnectionType =
   | 'subscribe'     // Queue/topic subscribe
   | 'event'         // Event emission
   | 'stream'        // Data streaming
-  | 'sync';         // File/data sync
+  | 'sync'          // File/data sync
+  // Plugin structure connections
+  | 'contains'      // Parent contains child
+  | 'triggers'      // Skill/hook triggers command
+  | 'validates'     // Hook validates command
+  | 'depends-on'    // Plugin depends on another
+  | 'exports';      // Plugin exports module
 
 export type GroupType =
+  // Infrastructure groups
   | 'vpc'           // AWS VPC
   | 'subnet'        // Network subnet
   | 'region'        // Cloud region
@@ -36,7 +53,10 @@ export type GroupType =
   | 'cluster'       // Container cluster
   | 'namespace'     // Kubernetes namespace
   | 'service-boundary'  // Logical service grouping
-  | 'security-group';   // Security boundary
+  | 'security-group'    // Security boundary
+  // Plugin structure groups
+  | 'marketplace'   // Plugin marketplace container
+  | 'plugin';       // Plugin container
 
 export interface Component {
   id: string;

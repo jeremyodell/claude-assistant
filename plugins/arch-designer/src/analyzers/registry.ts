@@ -2,6 +2,7 @@ import type { AnalyzerResult } from '../graph/types';
 import { BaseAnalyzer } from './base';
 import { TerraformAnalyzer } from './terraform';
 import { DockerComposeAnalyzer } from './docker-compose';
+import { PluginStructureAnalyzer } from './plugin-structure';
 
 /**
  * Registry for all infrastructure analyzers.
@@ -48,6 +49,7 @@ export function createDefaultRegistry(): AnalyzerRegistry {
 
   registry.register(new TerraformAnalyzer());
   registry.register(new DockerComposeAnalyzer());
+  registry.register(new PluginStructureAnalyzer());
 
   return registry;
 }

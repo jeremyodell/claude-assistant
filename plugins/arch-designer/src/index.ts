@@ -33,6 +33,7 @@ export { GraphBuilder } from './graph/builder';
 export { BaseAnalyzer } from './analyzers/base';
 export { TerraformAnalyzer } from './analyzers/terraform';
 export { DockerComposeAnalyzer } from './analyzers/docker-compose';
+export { PluginStructureAnalyzer } from './analyzers/plugin-structure';
 export {
   AnalyzerRegistry,
   createDefaultRegistry,
