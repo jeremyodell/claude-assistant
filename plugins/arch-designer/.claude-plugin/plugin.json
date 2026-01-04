@@ -1,0 +1,18 @@
+{
+  "name": "arch-designer",
+  "version": "1.0.0",
+  "description": "Code-first architecture diagramming with ByteByteGo-quality visuals and pitch deck generation",
+  "author": {
+    "name": "Jeremy Odell"
+  },
+  "license": "MIT",
+  "keywords": [
+    "architecture",
+    "diagrams",
+    "bytebytego",
+    "aws",
+    "infrastructure",
+    "pitch-deck",
+    "visualization"
+  ]
+}
