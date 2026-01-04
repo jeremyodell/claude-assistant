@@ -18,6 +18,12 @@
       "version": "1.0.0",
       "description": "Guided ideation workflow for exploring ideas through structured conversation before implementation",
       "source": "./plugins/ideate"
+    },
+    {
+      "name": "arch-designer",
+      "version": "1.0.0",
+      "description": "Code-first architecture diagramming with ByteByteGo-quality visuals and pitch deck generation",
+      "source": "./plugins/arch-designer"
     }
   ],
   "repository": "https://github.com/jeremyodell/claude-assistant"
