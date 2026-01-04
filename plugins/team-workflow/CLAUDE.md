@@ -4,7 +4,9 @@ This project uses the `team-workflow` plugin to enforce consistent, high-quality
 
 ## Mandatory Workflow
 
-All development work MUST follow this sequence:
+### Single Task Workflow
+
+All individual development tasks MUST follow this sequence:
 
 ```
 1. /team:task ENG-XXX     → Start work on an issue
@@ -16,6 +18,28 @@ All development work MUST follow this sequence:
 ```
 
 **Do not skip phases. Do not proceed if blocked.**
+
+### Parallel Feature Workflow
+
+For parent issues with sub-tasks, use the orchestrator:
+
+```
+/team:feature PROJ-100 --parallel=3
+```
+
+This will:
+1. Validate: Check sub-issues exist, detect dependency cycles
+2. Setup: Create feature branch from main
+3. Execute waves: Spawn parallel subagents for independent tasks
+4. Merge-forward: Completed tasks merge back to feature branch
+5. Unblock: Dependent tasks run after their blockers complete
+6. Report: Post progress to Linear, show completion summary
+7. Offer next actions: Create PR, retry failed tasks, etc.
+
+**Key behaviors:**
+- Each subagent runs `/team:task` branching from feature branch
+- Failed tasks are isolated; independent tasks continue
+- Single PR from feature branch to main at the end
 
 ## Quality Gate Requirements
 
@@ -136,9 +160,36 @@ The plugin enforces quality through hooks:
 
 **Hooks cannot be bypassed.** They prevent quality regressions.
 
+## Token Efficiency
+
+The workflow automatically detects plan specificity and chooses the most token-efficient execution mode:
+
+| Plan Type | Mode | Tokens |
+|-----------|------|--------|
+| Specific (has code blocks, file paths) | Direct | ~60% less |
+| Vague (needs exploration) | Subagent | Standard |
+
+**Override flags:**
+- `--direct` - Force inline execution (no subagents)
+- `--use-subagents` - Force subagent isolation
+
+**When to override:**
+
+Use `--direct` when:
+- Plan has literal code to implement
+- Tasks are simple CRUD/boilerplate
+- You've already explored the codebase
+
+Use `--use-subagents` when:
+- Tasks require exploration of unfamiliar code
+- Complex decisions need fresh context
+- Parallel execution would help
+
 ## Getting Help
 
-- `/team:task ENG-XXX` - Start the workflow
+- `/team:task ENG-XXX` - Start single task workflow
+- `/team:task ENG-XXX --direct` - Force direct execution
+- `/team:feature PROJ-XXX` - Orchestrate parallel sub-tasks
 - `/team:quality-check` - Check gate status
 - `/team:ship` - Create PR
 

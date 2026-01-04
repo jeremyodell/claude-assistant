@@ -1,10 +1,12 @@
-# /team:task $ISSUE_ID
+# /team:task $ISSUE_ID [--direct] [--use-subagents]
 
 Start work on a Linear issue using the team workflow. This enforces a deterministic, phase-gated development process.
 
 ## Arguments
 
 - `$ISSUE_ID`: Linear issue identifier (e.g., `ENG-123`, `PROJ-456`)
+- `--direct`: Force direct execution (no subagents) regardless of plan specificity
+- `--use-subagents`: Force subagent execution for context isolation
 
 ## Workflow Phases
 
@@ -101,9 +103,57 @@ This phase is handled by the Superpowers plugin's planning functionality.
 
 ---
 
+### Execution Mode Detection
+
+After plan approval, determine execution mode based on plan specificity:
+
+**Analyze plan specificity:**
+
+| Indicator | Score |
+|-----------|-------|
+| Task has code blocks with implementation | +2 |
+| Task mentions specific file paths | +1 |
+| Task uses vague language ("figure out", "investigate", "decide") | -2 |
+
+**Decision logic:**
+
+```
+If --direct flag provided:
+  → DIRECT MODE
+
+If --use-subagents flag provided:
+  → SUBAGENT MODE
+
+If total_score >= 2 (plan is specific):
+  → DIRECT MODE
+
+Else (plan is vague):
+  → SUBAGENT MODE
+```
+
+**Announce execution mode:**
+
+```
+Execution mode: DIRECT (plan contains specific code)
+To override: re-run with --use-subagents
+```
+or
+```
+Execution mode: SUBAGENT (plan requires exploration)
+To override: re-run with --direct
+```
+
+---
+
 ### Phase 3: Execute (TDD Required)
 
-Execute tasks using strict TDD methodology. Superpowers enforces this.
+Execute tasks using strict TDD methodology. Execution approach depends on the mode determined above.
+
+---
+
+#### DIRECT MODE (Default for Specific Plans)
+
+Execute all tasks inline without spawning subagents. This preserves context and reduces token usage by ~60%.
 
 **For each task:**
 
@@ -130,6 +180,26 @@ Execute tasks using strict TDD methodology. Superpowers enforces this.
 - Tests: X passing
 - Coverage: Y%
 ```
+
+---
+
+#### SUBAGENT MODE (For Vague Plans)
+
+Use `superpowers:subagent-driven-development` to spawn isolated agents for each task.
+
+**When to use:**
+- Plan requires exploration of unfamiliar code
+- Tasks involve complex decisions with trade-offs
+- Context isolation helps prevent mistakes
+- Parallel execution would be beneficial
+
+**Execution:**
+1. Invoke `superpowers:subagent-driven-development` skill
+2. Each task runs in isolated subagent context
+3. Subagents follow TDD requirements independently
+4. Results aggregated by orchestrator
+
+**Note:** Subagent mode uses more tokens but provides fresh context per task, which helps when exploration is needed.
 
 ---
 

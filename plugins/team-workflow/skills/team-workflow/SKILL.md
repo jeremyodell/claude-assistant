@@ -1,6 +1,6 @@
 ---
 name: team-workflow
-description: Deterministic team development workflow for Claude Code. Enforces a mandatory sequence of phases (Setup → Brainstorm → Plan → Execute → Quality Check → Ship) with Linear integration, TDD requirements, and quality gates. Activates when working on issues/tasks, when user mentions Linear issues (e.g., ENG-123), when starting development work, or when preparing to ship code. Commands: /team:task, /team:quality-check, /team:ship.
+description: Deterministic team development workflow for Claude Code. Enforces a mandatory sequence of phases (Setup → Brainstorm → Plan → Execute → Quality Check → Ship) with Linear integration, TDD requirements, and quality gates. Activates when working on issues/tasks, when user mentions Linear issues (e.g., ENG-123), when starting development work, when preparing to ship code, or when orchestrating parallel work on parent issues with sub-tasks. Commands: /team:task, /team:feature, /team:quality-check, /team:ship.
 ---
 
 # Team Workflow Skill
@@ -9,6 +9,7 @@ Enforces a deterministic, phase-gated development workflow with Linear integrati
 
 ## Workflow Overview
 
+### Single Task Workflow
 ```
 /team:task ENG-123
     ↓
@@ -25,10 +26,48 @@ Phase 4: Quality Check (/team:quality-check)
 Phase 5: Ship (/team:ship → PR + Linear update)
 ```
 
+### Parallel Feature Workflow
+```
+/team:feature PROJ-100 --parallel=3
+    ↓
+Validation (check sub-issues, detect cycles, Linear MCP)
+    ↓
+Setup (create feature branch from main)
+    ↓
+Wave 1: Spawn agents for tasks with no blockers
+    ↓   [PROJ-101, PROJ-102, PROJ-103 run in parallel]
+    ↓   Each runs /team:task, branches from feature branch
+    ↓
+Merge: Completed tasks merge back to feature branch
+    ↓
+Wave 2: Spawn agents for newly unblocked tasks
+    ↓   [PROJ-104, PROJ-105 depend on Wave 1]
+    ↓
+Repeat until all tasks complete or fail
+    ↓
+Summary: Present results, offer next actions (PR, retry, etc.)
+```
+
 ## Commands
 
 ### `/team:task $ISSUE_ID`
 Start work on a Linear issue. Enforces all workflow phases.
+
+### `/team:feature $PARENT_ISSUE_ID [--parallel=N]`
+Orchestrate parallel execution of sub-tasks under a parent issue. Analyzes dependencies, spawns color-coded subagents, and coordinates merges on a shared feature branch.
+
+**Arguments:**
+- `$PARENT_ISSUE_ID` - Linear issue ID of the parent (e.g., `PROJ-100`)
+- `--parallel=N` - Max concurrent agents (default: 3, range: 1-6)
+
+**Execution:**
+1. Builds dependency graph from `blockedBy` relations
+2. Creates feature branch from main
+3. Spawns subagents for independent tasks (wave execution)
+4. Merges completed work back to feature branch
+5. Spawns next wave when blockers complete
+6. Handles failures with isolation (continues independent tasks)
+7. Provides summary with next actions (create PR, retry failed, etc.)
 
 ### `/team:quality-check`
 Run all quality gates. Blocks PR creation on failure.
@@ -90,7 +129,19 @@ The plugin includes hooks that:
 
 ## Integration with Superpowers
 
-Phases 1-3 integrate with the Superpowers plugin:
-- Brainstorm phase uses Superpowers design thinking
-- Plan phase uses Superpowers task breakdown
-- Execute phase uses Superpowers TDD enforcement
+Phases 1-2 always use Superpowers for design thinking and planning.
+
+Phase 3 (Execute) uses **conditional execution mode**:
+
+| Plan Type | Execution Mode | Token Usage |
+|-----------|----------------|-------------|
+| Specific (code blocks, file paths) | Direct | ~60% less |
+| Vague (exploration needed) | Subagent | Standard |
+
+**Flags:**
+- `--direct` - Force direct execution
+- `--use-subagents` - Force subagent execution
+
+**Rule of thumb:**
+- Detailed plan with literal code → Direct execution
+- Vague requirements needing exploration → Subagent execution
