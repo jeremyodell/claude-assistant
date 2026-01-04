@@ -1,0 +1,17 @@
+{
+  "name": "ideate",
+  "version": "1.0.0",
+  "description": "Transform ideas into validated, dependency-mapped Linear stories through brainstorming, pressure testing, planning, and story creation",
+  "author": {
+    "name": "Jeremy Odell"
+  },
+  "license": "MIT",
+  "keywords": [
+    "ideation",
+    "brainstorm",
+    "planning",
+    "linear",
+    "stories",
+    "dependencies"
+  ]
+}
