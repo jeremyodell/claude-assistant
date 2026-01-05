@@ -37,7 +37,28 @@ If fails:
 Check your MCP configuration and try again.
 ```
 
-### Step 3: Create parent issue
+### Step 3: Ensure "pre-planned" label exists
+
+Check if the "pre-planned" label exists in Linear:
+
+```
+mcp__linear__list_issue_labels(team: "$LINEAR_TEAM")
+```
+
+If "pre-planned" label does not exist:
+
+```
+mcp__linear__create_issue_label(
+  name: "pre-planned",
+  description: "Issue has detailed implementation plan from ideate - skip brainstorm/plan phases in team-workflow",
+  color: "#7C3AED",
+  teamId: "$LINEAR_TEAM_ID"
+)
+```
+
+Store the label name/ID for use in subsequent steps.
+
+### Step 4: Create parent issue
 
 ```
 mcp__linear__create_issue(
@@ -45,13 +66,13 @@ mcp__linear__create_issue(
   team: "$LINEAR_TEAM",
   project: "$LINEAR_PROJECT",
   description: "## Overview\n\n$FEATURE_DESCRIPTION\n\n## Stories\n\n[Story count] sub-issues track implementation.\n\n---\n\n*Created via ideate plugin*",
-  labels: $DEFAULT_LABELS
+  labels: $DEFAULT_LABELS + ["pre-planned"]
 )
 ```
 
 Store the parent issue ID.
 
-### Step 4: Create sub-issues
+### Step 5: Create sub-issues
 
 For each story (in dependency order - create blockers first):
 
@@ -62,13 +83,15 @@ mcp__linear__create_issue(
   project: "$LINEAR_PROJECT",
   parentId: "$PARENT_ISSUE_ID",
   description: "$STRUCTURED_DESCRIPTION",
-  labels: $STORY_LABELS + $DEFAULT_LABELS
+  labels: $STORY_LABELS + $DEFAULT_LABELS + ["pre-planned"]
 )
 ```
 
+**Important:** All sub-issues get the "pre-planned" label because they contain detailed implementation plans from the ideate workflow.
+
 Store each sub-issue ID mapped to story title.
 
-### Step 5: Set blocking relations
+### Step 6: Set blocking relations
 
 For each story with dependencies:
 
@@ -79,7 +102,7 @@ mcp__linear__update_issue(
 )
 ```
 
-### Step 6: Update descriptions with links
+### Step 7: Update descriptions with links
 
 For each story, update the Dependencies section with Linear links:
 
@@ -97,7 +120,7 @@ Format:
 - Blocks: [PROJ-126](linear-link)
 ```
 
-### Step 7: Announce completion
+### Step 8: Announce completion
 
 ```
 ✅ Upload Complete
@@ -111,9 +134,10 @@ Sub-Issues:
 ...
 
 All [N] stories uploaded with dependencies.
+All sub-issues labeled with "pre-planned" for team-workflow integration.
 ```
 
-### Step 8: Save upload record
+### Step 9: Save upload record
 
 Append to `$FEATURE_DIR/stories.md`:
 

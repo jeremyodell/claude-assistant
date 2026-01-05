@@ -81,6 +81,28 @@ default_labels:
 - **Sub-Issues**: Individual stories as children
 - **Dependencies**: Native Linear blocking relations
 - **Labels**: Auto-suggested based on story content
+- **Pre-Planned Label**: Automatically added to all issues for team-workflow integration
+
+### Team-Workflow Integration
+
+When you upload stories to Linear using `/ideate:upload`, all issues are automatically labeled with `pre-planned`. This integrates with the `team-workflow` plugin:
+
+**What happens:**
+1. `/ideate:upload` creates the "pre-planned" label if it doesn't exist
+2. All parent and sub-issues receive this label
+3. When using `/team:task` with these issues, brainstorm and plan phases are skipped
+4. Workflow jumps directly to TDD execution
+
+**Why this matters:**
+- Eliminates duplicate planning work
+- Your detailed story descriptions become the implementation plan
+- Faster workflow: 5 phases → 3 phases for pre-planned tickets
+- Seamless handoff from ideation to execution
+
+**Label Details:**
+- **Name:** `pre-planned`
+- **Color:** `#7C3AED` (purple)
+- **Description:** "Issue has detailed implementation plan from ideate - skip brainstorm/plan phases in team-workflow"
 
 ## License
 

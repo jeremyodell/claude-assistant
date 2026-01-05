@@ -1,6 +1,6 @@
 {
   "name": "team-workflow",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "description": "Deterministic team development workflow with Linear integration, enforced TDD, and quality gates",
   "author": {
     "name": "Your Name",

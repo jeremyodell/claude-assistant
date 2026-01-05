@@ -118,6 +118,18 @@ Before using this plugin, ensure you have:
 
 ## Quick Start
 
+### Single Task
+```
+/team:task ENG-123
+```
+
+### Parallel Feature (parent with sub-issues)
+```
+/team:feature PROJ-100 --parallel=3
+```
+
+---
+
 1. **Start work on an issue:**
    ```
    /team:task ENG-123
@@ -165,6 +177,77 @@ Start work on a Linear issue. Guides you through all workflow phases.
 - Initiates brainstorm → plan → execute flow
 - Posts progress to Linear comments
 
+### `/team:feature $PARENT_ISSUE_ID [--parallel=N]`
+
+Orchestrate parallel execution of sub-tasks under a parent issue. Spawns color-coded subagents for independent tasks, coordinates dependency waves, and merges work to a shared feature branch.
+
+**Arguments:**
+- `$PARENT_ISSUE_ID` - Linear issue ID of the parent (e.g., `PROJ-100`)
+- `--parallel=N` - Max concurrent agents (default: 3, range: 1-6)
+
+**Execution Flow:**
+```
+┌─────────────────────────────────────────────────────────────────┐
+│                    FEATURE ORCHESTRATOR                         │
+├─────────────────────────────────────────────────────────────────┤
+│  /team:feature PROJ-100 --parallel=3                           │
+│         │                                                       │
+│         ▼                                                       │
+│  ┌──────────────┐                                              │
+│  │  Validation  │  • Check sub-issues exist                    │
+│  │              │  • Detect dependency cycles                  │
+│  │              │  • Verify Linear MCP connected               │
+│  └──────┬───────┘                                              │
+│         ▼                                                       │
+│  ┌──────────────┐                                              │
+│  │  Setup       │  • Create feature branch from main           │
+│  │              │  • Update parent status → "In Progress"      │
+│  │              │  • Post start comment to Linear              │
+│  └──────┬───────┘                                              │
+│         ▼                                                       │
+│  ┌──────────────┐                                              │
+│  │  Wave 1      │  Spawn agents for tasks with no blockers     │
+│  │  [parallel]  │  🔵 PROJ-101  🟢 PROJ-102  🟣 PROJ-103       │
+│  │              │  Each runs /team:task from feature branch    │
+│  └──────┬───────┘                                              │
+│         ▼                                                       │
+│  ┌──────────────┐                                              │
+│  │  Merge       │  • Completed tasks merge to feature branch   │
+│  │              │  • Failed tasks are isolated                 │
+│  │              │  • Unblock dependent tasks                   │
+│  └──────┬───────┘                                              │
+│         ▼                                                       │
+│  ┌──────────────┐                                              │
+│  │  Wave 2+     │  Spawn agents for newly unblocked tasks      │
+│  │  [repeat]    │  🟡 PROJ-104  🔴 PROJ-105                    │
+│  └──────┬───────┘                                              │
+│         ▼                                                       │
+│  ┌──────────────┐                                              │
+│  │  Summary     │  ✅ Completed: 5                             │
+│  │              │  ❌ Failed: 1                                │
+│  │              │  🚫 Blocked: 1                               │
+│  └──────┬───────┘                                              │
+│         ▼                                                       │
+│  ┌──────────────┐                                              │
+│  │  Next        │  1. Create PR from feature branch            │
+│  │  Actions     │  2. Retry failed tasks                       │
+│  │              │  3. View failure details                     │
+│  │              │  4. Exit and handle manually                 │
+│  └──────────────┘                                              │
+└─────────────────────────────────────────────────────────────────┘
+```
+
+**Dependency Handling:**
+- Builds DAG from `blockedBy` relations in Linear
+- Tasks without blockers run first (Wave 1)
+- Tasks wait until all blockers complete successfully
+- Failed tasks block their dependents (marked `blocked_by_failure`)
+
+**Failure Isolation:**
+- Failed tasks don't stop independent work
+- Progress continues on unrelated branches
+- Summary shows what succeeded, failed, and was blocked
+
 ### `/team:quality-check`
 
 Run all quality gates and report status.
@@ -194,6 +277,61 @@ Create PR and update Linear (only if quality gates pass).
 - Creates PR via `gh pr create`
 - Updates Linear status to "In Review"
 - Posts PR link as Linear comment
+
+## Pre-Planned Ticket Support
+
+The plugin integrates seamlessly with the **ideate plugin** to skip redundant planning phases for tickets that already have detailed implementation plans.
+
+### How It Works
+
+When you create tickets using `/ideate:upload`, all issues are automatically labeled with `pre-planned`. The team-workflow detects this label and skips directly to execution:
+
+```
+Pre-planned flow:
+/team:task ENG-123  (has "pre-planned" label)
+  ├─ Phase 0: Setup ✓
+  ├─ Phase 1: Brainstorm ⏭️  SKIPPED
+  ├─ Phase 2: Plan ⏭️  SKIPPED
+  ├─ Phase 3: Execute ✓
+  └─ Phases 4-5: Quality & Ship ✓
+```
+
+### Detection Logic
+
+In Phase 0, after fetching the Linear issue:
+1. Plugin checks issue labels for "pre-planned" (case-insensitive)
+2. If found:
+   - Announces: `🏷️  Detected 'pre-planned' label - Skipping Phases 1 & 2`
+   - Uses issue description as implementation plan
+   - Jumps directly to Phase 3 (Execute)
+3. If not found:
+   - Proceeds with normal brainstorm → plan flow
+
+### Creating Pre-Planned Labels Manually
+
+If you want to manually add the "pre-planned" label to issues:
+
+1. In Linear, create a new label:
+   - **Name:** `pre-planned`
+   - **Description:** `Issue has detailed implementation plan - skip brainstorm/plan phases`
+   - **Color:** `#7C3AED` (purple)
+
+2. Add the label to any issue with a detailed description
+3. Run `/team:task ISSUE-123` - phases 1 & 2 will be skipped
+
+### When to Use Pre-Planned
+
+**Use pre-planned when:**
+- Issues created via ideate plugin (automatic)
+- Ticket has detailed implementation steps in description
+- Technical approach is already decided
+- You want to jump straight to TDD execution
+
+**Don't use pre-planned when:**
+- Issue needs design exploration
+- Multiple solution approaches need evaluation
+- Requirements are vague or incomplete
+- Brainstorming would add value
 
 ## GitHub Actions
 

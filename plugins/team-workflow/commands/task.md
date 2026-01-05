@@ -22,7 +22,23 @@ Execute phases sequentially. Do not skip phases. Block progression if any phase 
    ```
    Extract: title, description, labels, assignee, priority
 
-2. **Update status to "In Progress"**
+2. **Check for pre-planned label**
+
+   Examine the labels array from the fetched issue. Look for a label with the name "pre-planned" (case-insensitive).
+
+   ```
+   labels_array = issue.labels
+   has_preplanned = any(label.name.lower() == "pre-planned" for label in labels_array)
+   ```
+
+   If `has_preplanned` is true:
+   - Set `SKIP_BRAINSTORM_AND_PLAN = true`
+   - Announce: "🏷️  Detected 'pre-planned' label - Skipping Phases 1 & 2"
+
+   Otherwise:
+   - Set `SKIP_BRAINSTORM_AND_PLAN = false`
+
+3. **Update status to "In Progress"**
    ```
    mcp__linear__update_issue(
      issueId: "$ISSUE_ID",
@@ -44,11 +60,16 @@ Execute phases sequentially. Do not skip phases. Block progression if any phase 
    - Issue: $ISSUE_ID - $TITLE
    - Branch: $BRANCH_NAME
    - Status: In Progress
+   - Pre-planned: <YES/NO>
    ```
+
+   If pre-planned: Add note "→ Skipping to Phase 3 (Execute)"
 
 ---
 
 ### Phase 1: Brainstorm (Superpowers Integration)
+
+**⚠️ CONDITIONAL: Skip this phase if `SKIP_BRAINSTORM_AND_PLAN = true`**
 
 This phase is handled by the Superpowers plugin's brainstorm functionality.
 
@@ -78,6 +99,8 @@ This phase is handled by the Superpowers plugin's brainstorm functionality.
 
 ### Phase 2: Plan (Superpowers Integration)
 
+**⚠️ CONDITIONAL: Skip this phase if `SKIP_BRAINSTORM_AND_PLAN = true`**
+
 This phase is handled by the Superpowers plugin's planning functionality.
 
 1. **Create detailed task breakdown**:
@@ -105,7 +128,9 @@ This phase is handled by the Superpowers plugin's planning functionality.
 
 ### Execution Mode Detection
 
-After plan approval, determine execution mode based on plan specificity:
+**For pre-planned tickets:** If `SKIP_BRAINSTORM_AND_PLAN = true`, the issue description should already contain the implementation plan. Use this description as the plan for mode detection.
+
+After plan approval (or for pre-planned tickets, after Phase 0), determine execution mode based on plan specificity:
 
 **Analyze plan specificity:**
 
